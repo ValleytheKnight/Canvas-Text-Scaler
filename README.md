@@ -10,9 +10,9 @@ resize it, instead of only scaling with canvas zoom.
 ## Why this is a plugin and not a CSS snippet
 
 Canvas card text scaling was tried in CSS first, twice, in the Rathgar Gold
-theme's own `theme.css`. Both attempts failed for reasons specific to how
-Obsidian's Canvas renders and virtualizes nodes. Both are documented here so
-nobody re-walks the same dead ends.
+theme's own `theme.css`. Both attempts failed, for reasons specific to how
+Obsidian's Canvas renders and virtualizes nodes, and both are documented here
+so nobody re-walks the same dead ends.
 
 ### Attempt 1: `container-type: size`
 
@@ -71,11 +71,11 @@ over a plain CSS font-size rule regardless of selector specificity.
 
 ### The risk test that unblocked the plugin
 
-Before writing any lifecycle/observer code, the open question was whether a
-JS-set font-size could survive that same zoom-compensation mechanism, since
-if it couldn't, this plugin would need to fight Canvas's internals directly
-instead of just observing size and setting a style. Tested live in a
-disposable canvas file:
+Before writing any lifecycle or observer code, one question had to be
+answered: could a JS-set font-size survive that same zoom-compensation
+mechanism? If not, this plugin would need to fight Canvas's internals
+directly instead of just observing size and setting a style. Tested live in
+a disposable canvas file:
 
 ```js
 const wrapper = document.querySelector('.canvas-node .markdown-preview-view, .canvas-node .markdown-embed-content');
@@ -102,6 +102,7 @@ range you control in settings.
 - Base font size and base card size (the reference point scale is computed from)
 - Minimum and maximum font size
 - Sensitivity multiplier
+- Respect existing font-size CSS (skip cards a theme/snippet already styles)
 
 ## Installation
 
@@ -115,17 +116,42 @@ Manual, until this is accepted into the community plugin directory:
 
 ## A known trade-off: inline styles, on purpose
 
-Obsidian's own [Plugin
+Obsidian's [Plugin
 Guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines)
-say not to hardcode inline styles, because it makes a user's theme or CSS
-snippet unable to override them. This plugin does exactly that, on the
-actual text elements inside a card, with `!important`. That's a deliberate
-choice, not an oversight: the risk test above confirmed it's the only
-technique that survives Obsidian's own internal zoom-compensation logic on
-Canvas, which itself sets style at a level plain stylesheet CSS can't win
-against regardless of selector specificity. The escape hatch is the
-**Enabled** toggle in settings, turn the plugin off and every inline
-font-size it set is cleared immediately.
+say not to hardcode inline styles, because it stops a user's theme or CSS
+snippet from overriding them. This plugin does exactly that, on the text
+inside a Canvas card, with `!important`.
+
+Why: the risk test above proved it's the only thing that survives
+Obsidian's own zoom-compensation logic on Canvas. A plain stylesheet rule
+loses to that mechanism no matter how specific it is. There was no clean
+option, only "doesn't work" and "works via inline style."
+
+**Scope: this plugin only touches text inside Canvas card nodes.** It
+never touches the editor, reading view, or anything outside a Canvas.
+Here's the exact code that decides what gets touched:
+
+```ts
+const TEXT_CONTAINER_SELECTOR = '.markdown-preview-view, .markdown-embed-content';
+
+export function findTextContainer(canvasNodeEl: Element): Element | null {
+	return canvasNodeEl.querySelector(TEXT_CONTAINER_SELECTOR);
+}
+```
+
+`canvasNodeEl` is always a single `.canvas-node` element, found by
+`ResizeObserver`, never the whole document. Unless your theme or snippet
+sets `font-size` on `.canvas-node .markdown-preview-view` (or
+`.markdown-embed-content` inside a Canvas node), there's no conflict.
+Few themes target that selector, so most users will never notice this
+plugin is setting inline styles at all.
+
+If your theme does target it: turn on **Respect existing font-size CSS**
+in settings. The plugin checks each card's font-size before it ever
+touches it, and if that size doesn't match its own default, it leaves
+the card alone instead of overriding it. There's also a plain **Enabled**
+toggle that turns the whole plugin off and clears every font-size it set,
+immediately.
 
 ## Demo GIF
 

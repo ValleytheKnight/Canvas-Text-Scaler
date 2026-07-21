@@ -14,6 +14,13 @@ export function applyFontSizePx(canvasNodeEl: Element, fontSizePx: number): void
 	});
 }
 
+export function getNaturalFontSizePx(canvasNodeEl: Element): number | null {
+	const container = findTextContainer(canvasNodeEl);
+	if (!container) return null;
+	const parsed = Number.parseFloat(getComputedStyle(container).fontSize);
+	return Number.isFinite(parsed) ? parsed : null;
+}
+
 export function clearFontSize(canvasNodeEl: Element): void {
 	const container = findTextContainer(canvasNodeEl);
 	if (!container) return;

@@ -1,13 +1,15 @@
 import { Plugin, PluginSettingTab, Setting, App } from 'obsidian';
 import { computeFontSizePx } from './scale.ts';
-import { applyFontSizePx, clearFontSize } from './apply-font-size.ts';
+import { applyFontSizePx, clearFontSize, getNaturalFontSizePx } from './apply-font-size.ts';
 import { DEFAULT_SETTINGS, type CanvasTextScalerSettings } from './types.ts';
 
 const CANVAS_NODE_SELECTOR = '.canvas-node';
+const EXTERNAL_OVERRIDE_TOLERANCE_PX = 0.5;
 
 export default class CanvasTextScalerPlugin extends Plugin {
 	settings: CanvasTextScalerSettings = DEFAULT_SETTINGS;
 	private resizeObservers = new WeakMap<Element, ResizeObserver>();
+	private naturalFontSizes = new WeakMap<Element, number | null>();
 	private mutationObserver: MutationObserver | null = null;
 
 	async onload() {
@@ -74,8 +76,13 @@ export default class CanvasTextScalerPlugin extends Plugin {
 
 	private attachToNode(node: Element) {
 		if (this.resizeObservers.has(node)) return;
+		this.naturalFontSizes.set(node, getNaturalFontSizePx(node));
 		const observer = new ResizeObserver((entries) => {
 			if (!this.settings.enabled) return;
+			if (this.settings.respectExternalFontSize && this.hasExternalFontSizeOverride(node)) {
+				clearFontSize(node);
+				return;
+			}
 			for (const entry of entries) {
 				const { width, height } = entry.contentRect;
 				const fontSizePx = computeFontSizePx(width, height, this.settings);
@@ -84,6 +91,12 @@ export default class CanvasTextScalerPlugin extends Plugin {
 		});
 		observer.observe(node);
 		this.resizeObservers.set(node, observer);
+	}
+
+	private hasExternalFontSizeOverride(node: Element): boolean {
+		const natural = this.naturalFontSizes.get(node) ?? null;
+		if (natural === null) return false;
+		return Math.abs(natural - this.settings.baseFontPx) > EXTERNAL_OVERRIDE_TOLERANCE_PX;
 	}
 }
 
@@ -183,6 +196,18 @@ class CanvasTextScalerSettingTab extends PluginSettingTab {
 						this.plugin.settings.sensitivity = parsed;
 						await this.plugin.saveSettings();
 					}
+				}),
+			);
+
+		new Setting(containerEl)
+			.setName('Respect existing font-size CSS')
+			.setDesc(
+				'If a theme or snippet already sets a custom font-size on canvas card text, leave that card alone instead of overriding it.',
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(this.plugin.settings.respectExternalFontSize).onChange(async (value) => {
+					this.plugin.settings.respectExternalFontSize = value;
+					await this.plugin.saveSettings();
 				}),
 			);
 	}
