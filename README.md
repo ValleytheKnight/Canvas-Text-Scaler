@@ -147,6 +147,10 @@ There's also a plain **Enabled** toggle that turns the whole plugin off
 and clears every font-size it set, immediately. Between the two, you are
 never stuck with this plugin overruling your own styling.
 
+## Contributing
+
+Issues and pull requests are welcome.
+
 ## Support
 
 If this plugin is useful to you, you can
