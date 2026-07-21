@@ -42,11 +42,11 @@ export default class CanvasTextScalerPlugin extends Plugin {
 		this.mutationObserver = new MutationObserver((mutations) => {
 			for (const mutation of mutations) {
 				mutation.addedNodes.forEach((added) => {
-					if (!(added instanceof Element)) return;
+					if (!added.instanceOf(Element)) return;
 					this.scanForCanvasNodes(added);
 				});
 				mutation.removedNodes.forEach((removed) => {
-					if (!(removed instanceof Element)) return;
+					if (!removed.instanceOf(Element)) return;
 					this.stopWatchingRemoved(removed);
 				});
 			}

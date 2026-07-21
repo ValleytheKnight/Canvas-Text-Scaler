@@ -3,6 +3,10 @@
 Scales the text inside an Obsidian Canvas card to the card's own size as you
 resize it, instead of only scaling with canvas zoom.
 
+![Canvas Text Scaler in action](docs/demo.gif)
+
+*(GIF goes here once recorded, see the "Demo GIF" note below.)*
+
 ## Why this is a plugin and not a CSS snippet
 
 Canvas card text scaling was tried in CSS first, twice, in the Rathgar Gold
@@ -98,6 +102,40 @@ range you control in settings.
 - Base font size and base card size (the reference point scale is computed from)
 - Minimum and maximum font size
 - Sensitivity multiplier
+
+## Installation
+
+Manual, until this is accepted into the community plugin directory:
+
+1. Download `main.js` and `manifest.json` from the latest [release](https://github.com/chrisairbrown-del/Canvas-Text-Scaler/releases).
+2. Create a folder named `canvas-text-scaler` inside your vault's
+   `.obsidian/plugins/` folder and put both files in it.
+3. Reload Obsidian (or disable/re-enable community plugins) and turn it on
+   under Settings → Community plugins.
+
+## A known trade-off: inline styles, on purpose
+
+Obsidian's own [Plugin
+Guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines)
+say not to hardcode inline styles, because it makes a user's theme or CSS
+snippet unable to override them. This plugin does exactly that, on the
+actual text elements inside a card, with `!important`. That's a deliberate
+choice, not an oversight: the risk test above confirmed it's the only
+technique that survives Obsidian's own internal zoom-compensation logic on
+Canvas, which itself sets style at a level plain stylesheet CSS can't win
+against regardless of selector specificity. The escape hatch is the
+**Enabled** toggle in settings, turn the plugin off and every inline
+font-size it set is cleared immediately.
+
+## Demo GIF
+
+Once a screen recording exists, convert it with ffmpeg (GitHub strips
+`<video>` tags from README, animated GIF is the only video-like format
+that renders inline):
+
+```
+ffmpeg -i input.mp4 -vf "fps=12,scale=800:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" docs/demo.gif
+```
 
 ## License
 
