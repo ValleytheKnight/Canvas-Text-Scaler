@@ -1,0 +1,11 @@
+{
+	"id": "canvas-card-text-scale",
+	"name": "Canvas Card Text Scale",
+	"version": "0.1.0",
+	"minAppVersion": "1.7.0",
+	"description": "Scales text inside Canvas cards to the card's own size as you resize it, instead of only scaling with zoom.",
+	"author": "Chris Brown",
+	"authorUrl": "https://github.com/chrisairbrown-del",
+	"fundingUrl": "https://www.buymeacoffee.com/valleytheknight",
+	"isDesktopOnly": false
+}
