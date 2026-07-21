@@ -11,7 +11,7 @@ for that, see "The safety net" further down.
 ## Why this is a plugin and not a CSS snippet
 
 I tried this in CSS first, twice, in my [Rathgar Gold
-theme](https://github.com/chrisairbrown-del/TTRPG-Rathgar-Gold-Theme)'s own
+theme](https://github.com/ValleytheKnight/TTRPG-Rathgar-Gold-Theme)'s own
 `theme.css`. Both attempts failed, for reasons specific to how Obsidian's
 Canvas renders and virtualizes nodes, and I'm writing both up here so I
 don't walk the same dead ends twice.
@@ -97,7 +97,7 @@ range you control in settings.
 
 Manual, until this is accepted into the community plugin directory:
 
-1. Download `main.js` and `manifest.json` from the latest [release](https://github.com/chrisairbrown-del/Canvas-Text-Scaler/releases).
+1. Download `main.js` and `manifest.json` from the latest [release](https://github.com/ValleytheKnight/Canvas-Text-Scaler/releases).
 2. Create a folder named `canvas-text-scaler` inside your vault's
    `.obsidian/plugins/` folder and put both files in it.
 3. Reload Obsidian (or disable/re-enable community plugins) and turn it on
