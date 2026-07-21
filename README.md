@@ -5,19 +5,21 @@ resize it, instead of only scaling with canvas zoom.
 
 ![Canvas Text Scaler in action](docs/demo.gif)
 
-*(GIF goes here once recorded, see the "Demo GIF" note below.)*
+If this ever fights with your own theme over font-size, there's a toggle
+for that, see "The safety net" further down.
 
 ## Why this is a plugin and not a CSS snippet
 
-Canvas card text scaling was tried in CSS first, twice, in the Rathgar Gold
-theme's own `theme.css`. Both attempts failed, for reasons specific to how
-Obsidian's Canvas renders and virtualizes nodes, and both are documented here
-so nobody re-walks the same dead ends.
+I tried this in CSS first, twice, in my [Rathgar Gold
+theme](https://github.com/chrisairbrown-del/TTRPG-Rathgar-Gold-Theme)'s own
+`theme.css`. Both attempts failed, for reasons specific to how Obsidian's
+Canvas renders and virtualizes nodes, and I'm writing both up here so I
+don't walk the same dead ends twice.
 
 ### Attempt 1: `container-type: size`
 
-Reconstructed from the project's own retrofit log (the literal rule wasn't
-kept, it was reverted immediately once confirmed broken):
+Here's roughly what I tried first. I didn't keep the exact rule, I reverted
+it the moment I saw it break:
 
 ```css
 .canvas-node,
@@ -36,7 +38,7 @@ decide when to swap a node from placeholder to fully-rendered embed.
 
 ### Attempt 2: `container-type: inline-size`
 
-Same situation, reconstructed from the log, not the literal surviving rule:
+Same situation, this is close to what I actually ran, not the literal rule:
 
 ```css
 .canvas-node-container {
@@ -45,37 +47,23 @@ Same situation, reconstructed from the log, not the literal surviving rule:
 ```
 
 **Result: did not break rendering, but text still didn't scale.** DevTools
-showed font-size stuck at a flat 16px regardless of node size. The real
-comment that survived in `theme.css` explaining why:
+showed font-size stuck at a flat 16px regardless of node size.
 
-```css
-/* Avoid container-type:size on .canvas-node or .canvas-node-container:
-   it breaks Obsidian's own Canvas virtualization, so cards fall back to
-   their raw placeholder text (the block reference label, e.g. "Dashboard
-   Session Running > ^tonightsnpcs") instead of rendering the actual
-   embedded content. container-type:size implies contain:size/layout/
-   style, which interferes with whatever Obsidian's Canvas uses
-   internally (ResizeObserver/IntersectionObserver against the real
-   node) to decide when to swap a node from placeholder to fully-
-   rendered embed. container-type:inline-size (width axis only) is
-   safe, since it leaves height/block-size in normal flow. */
-```
-
-Root cause: Obsidian's **core** Canvas (not a plugin, confirmed by grepping
-Advanced Canvas's own `main.js`, the string isn't there) already has a
+Root cause: Obsidian's **core** Canvas (not a plugin, I checked Advanced
+Canvas's own `main.js` myself, the string isn't in there) already has a
 built-in "font size relative to zoom" mechanism, a `--zoom-multiplier`
 custom property plus a `data-disable-font-size-relative-to-zoom` attribute
 on `.canvas-wrapper`. It compensates text size against *canvas zoom level*,
-not *node size*, a different axis than what this plugin wants, and it wins
+not *node size*, a different axis than what I actually wanted, and it wins
 over a plain CSS font-size rule regardless of selector specificity.
 
-### The risk test that unblocked the plugin
+### The test that told me this was buildable
 
-Before writing any lifecycle or observer code, one question had to be
-answered: could a JS-set font-size survive that same zoom-compensation
-mechanism? If not, this plugin would need to fight Canvas's internals
-directly instead of just observing size and setting a style. Tested live in
-a disposable canvas file:
+Before writing any lifecycle or observer code, I needed to answer one
+question: could a JS-set font-size survive that same zoom-compensation
+mechanism? If not, I'd need to fight Canvas's internals directly instead of
+just observing size and setting a style. I tested it live in a disposable
+canvas file:
 
 ```js
 const wrapper = document.querySelector('.canvas-node .markdown-preview-view, .canvas-node .markdown-embed-content');
@@ -102,7 +90,8 @@ range you control in settings.
 - Base font size and base card size (the reference point scale is computed from)
 - Minimum and maximum font size
 - Sensitivity multiplier
-- Respect existing font-size CSS (skip cards a theme/snippet already styles)
+- **Respect existing font-size CSS** (the safety net, see below, skips
+  cards a theme/snippet already styles)
 
 ## Installation
 
@@ -122,14 +111,15 @@ say not to hardcode inline styles, because it stops a user's theme or CSS
 snippet from overriding them. This plugin does exactly that, on the text
 inside a Canvas card, with `!important`.
 
-Why: the risk test above proved it's the only thing that survives
-Obsidian's own zoom-compensation logic on Canvas. A plain stylesheet rule
-loses to that mechanism no matter how specific it is. There was no clean
-option, only "doesn't work" and "works via inline style."
+Why: the test above proved it's the only thing that survives Obsidian's
+own zoom-compensation logic on Canvas. A plain stylesheet rule loses to
+that mechanism no matter how specific it is. There was no clean option,
+only "doesn't work" and "works via inline style."
 
-**Scope: this plugin only touches text inside Canvas card nodes.** It
-never touches the editor, reading view, or anything outside a Canvas.
-Here's the exact code that decides what gets touched:
+I kept the scope deliberately narrow: this plugin only touches text
+inside Canvas card nodes. It never touches the editor, reading view, or
+anything outside a Canvas. Here's the exact code I use to decide what
+gets touched:
 
 ```ts
 const TEXT_CONTAINER_SELECTOR = '.markdown-preview-view, .markdown-embed-content';
@@ -146,22 +136,16 @@ sets `font-size` on `.canvas-node .markdown-preview-view` (or
 Few themes target that selector, so most users will never notice this
 plugin is setting inline styles at all.
 
-If your theme does target it: turn on **Respect existing font-size CSS**
-in settings. The plugin checks each card's font-size before it ever
-touches it, and if that size doesn't match its own default, it leaves
-the card alone instead of overriding it. There's also a plain **Enabled**
-toggle that turns the whole plugin off and clears every font-size it set,
-immediately.
+### The safety net: Respect existing font-size CSS
 
-## Demo GIF
+**If your theme does target it, turn this on.** In settings, enable
+**Respect existing font-size CSS** and the plugin checks each card's
+font-size before it ever touches it. If that size doesn't match its own
+default, it leaves the card alone completely, no override, no fight.
 
-Once a screen recording exists, convert it with ffmpeg (GitHub strips
-`<video>` tags from README, animated GIF is the only video-like format
-that renders inline):
-
-```
-ffmpeg -i input.mp4 -vf "fps=12,scale=800:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" docs/demo.gif
-```
+There's also a plain **Enabled** toggle that turns the whole plugin off
+and clears every font-size it set, immediately. Between the two, you are
+never stuck with this plugin overruling your own styling.
 
 ## License
 
