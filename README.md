@@ -1,4 +1,4 @@
-# Canvas Card Text Scale
+# Canvas Text Scaler
 
 Scales the text inside an Obsidian Canvas card to the card's own size as you
 resize it, instead of only scaling with canvas zoom.

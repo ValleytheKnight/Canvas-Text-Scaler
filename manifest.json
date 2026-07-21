@@ -1,6 +1,6 @@
 {
-	"id": "canvas-card-text-scale",
-	"name": "Canvas Card Text Scale",
+	"id": "canvas-text-scaler",
+	"name": "Canvas Text Scaler",
 	"version": "0.1.0",
 	"minAppVersion": "1.7.0",
 	"description": "Scales text inside Canvas cards to the card's own size as you resize it, instead of only scaling with zoom.",

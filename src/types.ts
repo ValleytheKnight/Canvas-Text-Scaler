@@ -1,4 +1,4 @@
-export interface CanvasCardTextScaleSettings {
+export interface CanvasTextScalerSettings {
 	enabled: boolean;
 	baseFontPx: number;
 	baseWidth: number;
@@ -8,7 +8,7 @@ export interface CanvasCardTextScaleSettings {
 	sensitivity: number;
 }
 
-export const DEFAULT_SETTINGS: CanvasCardTextScaleSettings = {
+export const DEFAULT_SETTINGS: CanvasTextScalerSettings = {
 	enabled: true,
 	baseFontPx: 16,
 	baseWidth: 260,

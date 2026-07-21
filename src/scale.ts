@@ -1,6 +1,6 @@
-import type { CanvasCardTextScaleSettings } from './types.ts';
+import type { CanvasTextScalerSettings } from './types.ts';
 
-export function computeFontSizePx(width: number, height: number, settings: CanvasCardTextScaleSettings): number {
+export function computeFontSizePx(width: number, height: number, settings: CanvasTextScalerSettings): number {
 	if (width <= 0 || height <= 0 || settings.baseWidth <= 0 || settings.baseHeight <= 0) {
 		return settings.baseFontPx;
 	}

@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { computeFontSizePx } from '../src/scale.ts';
-import type { CanvasCardTextScaleSettings } from '../src/types.ts';
+import type { CanvasTextScalerSettings } from '../src/types.ts';
 
-const settings: CanvasCardTextScaleSettings = {
+const settings: CanvasTextScalerSettings = {
 	enabled: true,
 	baseFontPx: 16,
 	baseWidth: 260,
@@ -23,7 +23,7 @@ void test('computeFontSizePx scales up when the card is larger', () => {
 });
 
 void test('computeFontSizePx scales down when the card is smaller', () => {
-	const lowFloor: CanvasCardTextScaleSettings = { ...settings, minFontPx: 1 };
+	const lowFloor: CanvasTextScalerSettings = { ...settings, minFontPx: 1 };
 	const result = computeFontSizePx(130, 100, lowFloor);
 	assert.equal(result, 8);
 });
@@ -43,6 +43,6 @@ void test('computeFontSizePx falls back to baseFontPx on zero-size input', () =>
 });
 
 void test('computeFontSizePx applies the sensitivity multiplier', () => {
-	const doubled: CanvasCardTextScaleSettings = { ...settings, sensitivity: 2 };
+	const doubled: CanvasTextScalerSettings = { ...settings, sensitivity: 2 };
 	assert.equal(computeFontSizePx(260, 200, doubled), 32);
 });

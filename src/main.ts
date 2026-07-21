@@ -1,18 +1,18 @@
 import { Plugin, PluginSettingTab, Setting, App } from 'obsidian';
 import { computeFontSizePx } from './scale.ts';
 import { applyFontSizePx, clearFontSize } from './apply-font-size.ts';
-import { DEFAULT_SETTINGS, type CanvasCardTextScaleSettings } from './types.ts';
+import { DEFAULT_SETTINGS, type CanvasTextScalerSettings } from './types.ts';
 
 const CANVAS_NODE_SELECTOR = '.canvas-node';
 
-export default class CanvasCardTextScalePlugin extends Plugin {
-	settings: CanvasCardTextScaleSettings = DEFAULT_SETTINGS;
+export default class CanvasTextScalerPlugin extends Plugin {
+	settings: CanvasTextScalerSettings = DEFAULT_SETTINGS;
 	private resizeObservers = new WeakMap<Element, ResizeObserver>();
 	private mutationObserver: MutationObserver | null = null;
 
 	async onload() {
 		await this.loadSettings();
-		this.addSettingTab(new CanvasCardTextScaleSettingTab(this.app, this));
+		this.addSettingTab(new CanvasTextScalerSettingTab(this.app, this));
 
 		this.app.workspace.onLayoutReady(() => {
 			this.scanForCanvasNodes(document.body);
@@ -30,7 +30,7 @@ export default class CanvasCardTextScalePlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		const data = (await this.loadData()) as Partial<CanvasCardTextScaleSettings> | null;
+		const data = (await this.loadData()) as Partial<CanvasTextScalerSettings> | null;
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
 	}
 
@@ -87,10 +87,10 @@ export default class CanvasCardTextScalePlugin extends Plugin {
 	}
 }
 
-class CanvasCardTextScaleSettingTab extends PluginSettingTab {
-	plugin: CanvasCardTextScalePlugin;
+class CanvasTextScalerSettingTab extends PluginSettingTab {
+	plugin: CanvasTextScalerPlugin;
 
-	constructor(app: App, plugin: CanvasCardTextScalePlugin) {
+	constructor(app: App, plugin: CanvasTextScalerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}

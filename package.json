@@ -1,5 +1,5 @@
 {
-	"name": "canvas-card-text-scale",
+	"name": "canvas-text-scaler",
 	"version": "0.1.0",
 	"description": "Obsidian plugin: scale text inside Canvas cards to the card's own size as you resize it.",
 	"main": "main.js",
