@@ -147,6 +147,11 @@ There's also a plain **Enabled** toggle that turns the whole plugin off
 and clears every font-size it set, immediately. Between the two, you are
 never stuck with this plugin overruling your own styling.
 
+## Support
+
+If this plugin is useful to you, you can
+[buy me a coffee](https://www.buymeacoffee.com/valleytheknight).
+
 ## License
 
 MIT
