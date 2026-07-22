@@ -84,6 +84,36 @@ Watches each visible Canvas card's real rendered size with a
 `ResizeObserver` and scales its text proportionally, clamped to a min/max
 range you control in settings.
 
+## Shrink to fit (fixed in 0.2.0)
+
+![Shrink to fit demo](docs/demo-shrink-to-fit.gif)
+
+A card with more text than fits used to scroll no matter how big you made it, because font size and card size scaled at the same rate; this fix adds a correction pass that only kicks in on overflowing cards, binary-searching down to the largest font size that actually fits (down to your minimum font size setting) instead of letting it scroll, with a **Shrink to fit** toggle in settings if you'd rather turn it off.
+
+```ts
+export function findFittingFontSize(
+	candidateFontSizePx: number,
+	minFontSizePx: number,
+	overflows: (fontSizePx: number) => boolean,
+	iterations = 6,
+): number {
+	if (!overflows(candidateFontSizePx)) return candidateFontSizePx;
+	if (overflows(minFontSizePx)) return minFontSizePx;
+
+	let lo = minFontSizePx;
+	let hi = candidateFontSizePx;
+	for (let i = 0; i < iterations; i++) {
+		const mid = (lo + hi) / 2;
+		if (overflows(mid)) {
+			hi = mid;
+		} else {
+			lo = mid;
+		}
+	}
+	return lo;
+}
+```
+
 ## Settings
 
 - Enable/disable
@@ -92,6 +122,8 @@ range you control in settings.
 - Sensitivity multiplier
 - **Respect existing font-size CSS** (the safety net, see below, skips
   cards a theme/snippet already styles)
+- **Shrink to fit** (see above, only affects cards that would otherwise
+  overflow)
 
 ## Installation
 
