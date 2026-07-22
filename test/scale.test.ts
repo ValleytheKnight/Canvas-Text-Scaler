@@ -12,6 +12,7 @@ const settings: CanvasTextScalerSettings = {
 	maxFontPx: 72,
 	sensitivity: 1,
 	respectExternalFontSize: false,
+	shrinkToFit: true,
 };
 
 void test('computeFontSizePx returns the base font size at the base card size', () => {

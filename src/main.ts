@@ -1,6 +1,7 @@
 import { Plugin, PluginSettingTab, Setting, App } from 'obsidian';
 import { computeFontSizePx } from './scale.ts';
-import { applyFontSizePx, clearFontSize, getNaturalFontSizePx } from './apply-font-size.ts';
+import { applyFontSizePx, clearFontSize, getNaturalFontSizePx, overflowsVertically } from './apply-font-size.ts';
+import { findFittingFontSize } from './fit-font-size.ts';
 import { DEFAULT_SETTINGS, type CanvasTextScalerSettings } from './types.ts';
 
 const CANVAS_NODE_SELECTOR = '.canvas-node';
@@ -87,6 +88,14 @@ export default class CanvasTextScalerPlugin extends Plugin {
 				const { width, height } = entry.contentRect;
 				const fontSizePx = computeFontSizePx(width, height, this.settings);
 				applyFontSizePx(node, fontSizePx);
+
+				if (this.settings.shrinkToFit && overflowsVertically(node, height)) {
+					const fitted = findFittingFontSize(fontSizePx, this.settings.minFontPx, (candidatePx) => {
+						applyFontSizePx(node, candidatePx);
+						return overflowsVertically(node, height);
+					});
+					applyFontSizePx(node, fitted);
+				}
 			}
 		});
 		observer.observe(node);
@@ -207,6 +216,18 @@ class CanvasTextScalerSettingTab extends PluginSettingTab {
 			.addToggle((toggle) =>
 				toggle.setValue(this.plugin.settings.respectExternalFontSize).onChange(async (value) => {
 					this.plugin.settings.respectExternalFontSize = value;
+					await this.plugin.saveSettings();
+				}),
+			);
+
+		new Setting(containerEl)
+			.setName('Shrink to fit')
+			.setDesc(
+				'If text still overflows and scrolls after scaling, shrink it further instead, down to the minimum font size. Only affects cards that would otherwise overflow, everything else scales exactly as before.',
+			)
+			.addToggle((toggle) =>
+				toggle.setValue(this.plugin.settings.shrinkToFit).onChange(async (value) => {
+					this.plugin.settings.shrinkToFit = value;
 					await this.plugin.saveSettings();
 				}),
 			);

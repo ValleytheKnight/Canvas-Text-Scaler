@@ -7,6 +7,7 @@ export interface CanvasTextScalerSettings {
 	maxFontPx: number;
 	sensitivity: number;
 	respectExternalFontSize: boolean;
+	shrinkToFit: boolean;
 }
 
 export const DEFAULT_SETTINGS: CanvasTextScalerSettings = {
@@ -18,4 +19,5 @@ export const DEFAULT_SETTINGS: CanvasTextScalerSettings = {
 	maxFontPx: 72,
 	sensitivity: 1,
 	respectExternalFontSize: false,
+	shrinkToFit: true,
 };
